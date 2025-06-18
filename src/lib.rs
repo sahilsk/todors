@@ -11,19 +11,19 @@ pub enum TodorsError{
 }
 
 pub struct Config {
-    context: String,
-    storagedir: String,
+    pub context: String,
+    pub storagedir: String,
 }
 
 
 impl Config {
-    fn new(context: String, storagedir: String) -> Self{
+    pub fn new(context: String, storagedir: String) -> Self{
         Self{
             context,
             storagedir,
         }
     }
-    fn init(&self) -> Result<&Self> {
+    pub fn init(&self) -> Result<&Self> {
         /*
          *- create tmp dir
          * - stoe config file

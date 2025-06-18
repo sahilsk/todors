@@ -2,10 +2,9 @@ use clap::{Parser, Subcommand, Args};
 use todors::*;
 
 #[derive(Parser)]
-#[command(name = "Todors")]
-#[command(version = "1.0")]
-#[command(about = "Does awesome things", long_about = None)]
+#[command(author, version, about)]
 struct Cli {
+
     #[command(subcommand)]
     command: Commands,
 }
@@ -13,9 +12,15 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     /// Adds files to myapp
-    List(ListArgs),
-    Task(TaskArgs),
+    Ls(ListArgs),
+    Init(InitArgs),
+    Use(UseArgs),
+    Add(AddArgs),
+    Done(DoneArgs),
+    Undone(UndoneArgs),
+    Rm(RmArgs),
 }
+
 
 #[derive(Args, Debug)]
 struct ListArgs {
@@ -26,38 +31,80 @@ struct ListArgs {
     set: Option<String>,
 }
 
-#[derive(Args, Debug)]
-struct TaskArgs {
-    name: Option<String>,
+#[derive(Args,Debug)]
+struct InitArgs {
+    listname : String,
 }
 
+#[derive(Args,Debug)]
+struct AddArgs {
+    id_or_partial_desc: String,
+}
+
+#[derive(Args,Debug)]
+struct UseArgs {
+    id_or_partial_desc: String,
+}
+
+#[derive(Args,Debug)]
+struct DoneArgs {
+    id_or_partial_desc: String,
+}
+
+#[derive(Args,Debug)]
+struct UndoneArgs {
+    id_or_partial_desc: String,
+}
+
+#[derive(Args,Debug)]
+struct RmArgs {
+    id_or_partial_desc: String,
+}
 
 fn main() {
     let cli = Cli::parse();
     println!("Hello, world!");
 
     match &cli.command {
-        Commands::List(new) => {
-            println!("Creating new list : {new:?}");
+        Commands::Ls(args)=> {
+            if let Some(newlist) = &args.new {
+                println!("Creating new list : {:?}", newlist);
+            }
+            if let Some(setlist) = &args.set{
+                println!("Setting list : {:?}", setlist);
+            }
         },
-        Commands::List(set) => {
-            println!("Set context list : {set:?}");
-        },
-        Commands::Task(name) => {
-            println!(" name is: {name:?}" );
+        Commands::Init(args) => {
+            println!("Init command called");
+        }
+        Commands::Use(args) => {
+            println!("Use command called");
+        }
+        Commands::Add(args) => {
+            println!("Add command called");
+        }
+        Commands::Done(args) => {
+            println!("Done command called");
+        }
+        Commands::Undone(args) => {
+            println!("Undone command called");
+        }
+        Commands::Rm(args) => {
+            println!("Rm command called");
         }
     }
 }
 
 
-#[cfg(tests)]
+#[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_cfg_new() {
-        let cfg = Config::new("".to_string(), "todors");
-
+    fn verify_cli() {
+        use clap::CommandFactory;
+        Cli::command().debug_assert();
+        println!("{:#?}", Cli::command());
     }
 
 }

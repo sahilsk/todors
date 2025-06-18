@@ -8,17 +8,47 @@ A little cli to manage todo list stored in specified file.
 
 Create new todolist
 
-    $ todors list new "mytodofile"
+    $ todors init <mylist>
+
+List all files
+
+    $ todors ls --files
 
 Set the context under which following commands will work
 
-    $ todors list set mytodofile
+    $ todors use <mylist>
 
 Now,you can run following commands to manage task in todo list named "mytodofilel"
 
-    $ todors task add "finish task today"
-    $ todors task done "finish task today"
-    $ todors task rm "finish task today"
-    $ todors task undon "finish task today"
+    $ todors add "<id_or_partial_desc>"
+    $ todors done/undone  "<id_or_partial_desc>"
+    $ todors rm "<id_or_partial_desc>"
+
+List all tasks:
+
+    $ todors ls 
+
+
+# Todo structure 
+
+# 
+
+todo init <list-name>
+    - it should create list in cfgr dir
+    - list: metadata
+    
+
+Todo list Strucutre
+
+- 
+```
+Name:
+Created_at:
+Modified_at:
+---
+Task List
+---
+1. <added_at> || task description
+2.
 
 
