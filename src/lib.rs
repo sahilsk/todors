@@ -1,47 +1,52 @@
-use anyhow::{Context, Result};
-use std::env;
+use anyhow::{Context, Error as AnyhowError, Result};
+use std::{
+    env,
+    io::{self, Error as stdIoError},
+    path::PathBuf,
+};
 use thiserror::Error;
 
-#[derive(Error, Debug)]
+#[derive(Debug, Error)]
 pub enum TodorsError {
-    #[error("IO Error")]
-    DiskIo(#[from] anyhow::Error),
+    #[error("transparent")]
+    Io(#[from] stdIoError),
+
+    #[error("file already exist: {0}")]
+    FileExist(String),
+
+    #[error("transparent")]
+    Unknown(#[from] anyhow::Error),
 }
 
-pub fn init(listname: &String) -> Result<()> {
-    /*
-     *- create tmp dir
-     * - stoe config file
-     */
+pub fn init(listname: &String) -> Result<(), TodorsError> {
+    let mut cfg_dir = create_cfg_dir().context("Failed to create cfg dir")?;
 
-    let CFG_DIR_NAME = ".todors";
-    let mut cfg_dir = env::home_dir().expect("Missing home directory");
-
-    //create the config dir and file
-    cfg_dir.push(CFG_DIR_NAME);
-
-    std::fs::create_dir_all(&cfg_dir.as_path())
-        .with_context(|| format!("Failed to create config dir {cfg_dir:?}"))
-        .map_err(TodorsError::DiskIo)?;
-
-    cfgr_dir.push(listname);
-    std::fs::File::create_new(&cfgr_dir.as_path())
-        .with_context(|| format!("Failed to create list: {&cfgr_dir:?}"))
-        .map_err(TodorsError::DiskIo)?;
+    cfg_dir.push(listname);
+    let ownedString = cfg_dir.display().to_string();
+    if let Err(e) = std::fs::File::create_new(&cfg_dir.as_path()) {
+        match e.kind() {
+            std::io::ErrorKind::AlreadyExists => {
+                return Err(TodorsError::FileExist(ownedString));
+            }
+            _ => return Err(TodorsError::Io(e)),
+        }
+    };
 
     Ok(())
 }
 
-pub fn create_cfg_dir() -> Result<(), <dyn Error>> {
-
+pub fn create_cfg_dir() -> Result<PathBuf> {
     let CFG_DIR_NAME = ".todors";
 
-    let mut cfg_dir:std::path::PathBuf = env::home_dir().unwrap_or("~/".into());
+    let mut cfg_dir = match env::home_dir() {
+        Some(home_dir) => home_dir,
+        None => {
+            return Err(AnyhowError::msg("Screw home dir"));
+        }
+    };
+
     cfg_dir.push(CFG_DIR_NAME);
+    std::fs::create_dir_all(&cfg_dir)?;
 
-    std::fs::create_dir_all(cfg_dir)
-        .with_context(|| format!("Failed to create cfg dir: {cfg_dir:?}"))
-        .map_err(TodorsError::DiskIo)?;
-
-    Ok(());
+    Ok(cfg_dir)
 }

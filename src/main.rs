@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand, Args};
 use todors::*;
+use anyhow::Error;
 
 #[derive(Parser)]
 #[command(author, version, about)]
@@ -12,12 +13,18 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     /// Adds files to myapp
-    Ls(ListArgs),
+    List(ListArgs),
+    /// Init the list
     Init(InitArgs),
+    /// Set the list for add/update tasks
     Use(UseArgs),
+    /// Add new task to the list
     Add(AddArgs),
+    /// Mark task done
     Done(DoneArgs),
+    /// Mark task undone
     Undone(UndoneArgs),
+    /// Remove task from the list
     Rm(RmArgs),
 }
 
@@ -61,14 +68,15 @@ struct RmArgs {
     id_or_partial_desc: String,
 }
 
-fn main() {
+fn main()  -> Result<(), Error>{
     let cli = Cli::parse();
     println!("Hello, world!");
 
     match &cli.command {
-        Commands::Ls(args)=> {
+        Commands::List(args)=> {
             if let Some(newlist) = &args.new {
                 println!("Creating new list : {:?}", newlist);
+                init(&newlist)?;
             }
             if let Some(setlist) = &args.set{
                 println!("Setting list : {:?}", setlist);
@@ -93,6 +101,8 @@ fn main() {
             println!("Rm command called");
         }
     }
+
+    Ok(())
 }
 
 
