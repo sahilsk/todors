@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand, Args};
 use todors::*;
-use anyhow::Error;
+use anyhow::{Error, Result};
 
 #[derive(Parser)]
 #[command(author, version, about)]
@@ -33,9 +33,6 @@ enum Commands {
 struct ListArgs {
     #[arg(short, long)]
     new: Option<String>,
-
-    #[arg(short, long)]
-    set: Option<String>,
 }
 
 #[derive(Args,Debug)]
@@ -68,22 +65,19 @@ struct RmArgs {
     id_or_partial_desc: String,
 }
 
-fn main()  -> Result<(), Error>{
+fn main()  -> Result<()>{
     let cli = Cli::parse();
     println!("Hello, world!");
 
     match &cli.command {
         Commands::List(args)=> {
-            if let Some(newlist) = &args.new {
+            if let Some(newlist) = &args.new{
                 println!("Creating new list : {:?}", newlist);
-                init(&newlist)?;
-            }
-            if let Some(setlist) = &args.set{
-                println!("Setting list : {:?}", setlist);
             }
         },
         Commands::Init(args) => {
             println!("Init command called");
+            init(&args.listname)?;
         }
         Commands::Use(args) => {
             println!("Use command called");

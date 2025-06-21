@@ -48,29 +48,38 @@ pub fn use_list(&listname) -> Result<(), TodorsError> {
         Err(e) => {
             return Err(TodorsError::Io(e));
         },
+
+
     }
 
     Ok(())
 }
 
 pub fn create_cfg_dir() -> Result<PathBuf> {
-    let home_dir = match env::home_dir().unwrap_or("~/");
-    let cfg_dir = home_dir.join(CFG_DIR_NAME);
-    std::fs::create_dir_all(&cfg_dir).map_err( TodorsError::Io)?;
+
+    let mut cfg_dir = match env::home_dir() {
+        Some(home_dir) => home_dir,
+        None => {
+            return Err(AnyhowError::msg("Screw home dir"));
+        }
+    };
+
+    cfg_dir.push(CFG_DIR_NAME);
+    std::fs::create_dir_all(&cfg_dir)?;
 
     Ok(cfg_dir)
 }
 
-pub fn create_cfg_file() -> Result<std::fs::File, TodorsError> {
-    let cfg_dir = create_cfg_dir()?;
-    let home_dir = std::env::home_dir().unwrap_or("~/");
-    let cfg_file_path = home_dir.join(CFG_DIR_NAME).join(CFG_FILE);
+pub fn create_configfile() -> Result<bool, TodorsError> {
 
+    let cfg_dir = std::env::home_dir().unwrap();
 
-    if !std::fs::exists(cfg_file_path).unwrap_or(false) {
-        let cfg_file = std::fs::File::create_new(cfg_file_path).map_err( TodorsError::Io);
-        Ok(cfg_file)
+    cfg_dir.push(CFG_DIR_NAME);
+    if !std::fs::exists(cfg_dir).unwrap() {
+       std::fs::create_dir(cfg_dir).map_err(TodorsError::Io)?;
     }
 
-}
+    if !std::fs::exists(
 
+    Ok(true)
+}
