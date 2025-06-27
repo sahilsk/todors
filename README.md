@@ -6,9 +6,14 @@ A little cli to manage todo list stored in specified file.
 
 # function requirements
 
+
+Config init: Generate config file
+
+    $ todors config init
+
 Create new todolist
 
-    $ todors init <mylist>
+    $ todors new <mylist>
 
 List all files
 

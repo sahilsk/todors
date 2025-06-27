@@ -1,6 +1,9 @@
+#[allow(unused)]
 use clap::{Parser, Subcommand, Args};
 use todors::*;
+use std::time::SystemTime;
 use anyhow::{Error, Result};
+use serde_json::*;
 
 #[derive(Parser)]
 #[command(author, version, about)]
@@ -12,6 +15,8 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    ///  Config init
+    Config(ConfigArgs),
     /// Adds files to myapp
     List(ListArgs),
     /// Init the list
@@ -28,6 +33,11 @@ enum Commands {
     Rm(RmArgs),
 }
 
+
+#[derive(Args, Debug)]
+struct ConfigArgs {
+    init: String,
+}
 
 #[derive(Args, Debug)]
 struct ListArgs {
@@ -70,28 +80,66 @@ fn main()  -> Result<()>{
     println!("Hello, world!");
 
     match &cli.command {
+        Commands::Config(args)  => {
+            println!("args: {}", &args.init);
+            create_cfg_file()?;
+        },
         Commands::List(args)=> {
             if let Some(newlist) = &args.new{
                 println!("Creating new list : {:?}", newlist);
             }
         },
+
         Commands::Init(args) => {
+            /*
+            -- init <mylist>
+            Create a new text file in the config dir
+            */
             println!("Init command called");
-            init(&args.listname)?;
+            let a = TaskList {
+                id: "myuid".to_string(),
+                listname: "mylist".to_string(),
+                filepath: "my/file/path".to_string(),
+                created_at: SystemTime::now(),
+                last_modified: SystemTime::now(),
+                tasks: Vec::new(),
+            };
+            println!("Tasklist: {}", a);
+            println!("Tasklist: {:?}", serde_json::to_string(&a));
         }
         Commands::Use(args) => {
+            /*
+            -- use <mylist>
+            set the context to <mylist>
+            */
             println!("Use command called");
         }
         Commands::Add(args) => {
+            /*
+            -- add <my task>
+            add task to the list set in the context
+            */
             println!("Add command called");
         }
         Commands::Done(args) => {
+            /*
+            -- done <id or task descr>
+            mark the task done in the list set in the ctx
+            */
             println!("Done command called");
         }
         Commands::Undone(args) => {
+            /*
+            -- undone <id or task descr>
+            mark the task undone in the list set in the ctx
+            */
             println!("Undone command called");
         }
         Commands::Rm(args) => {
+            /*
+            -- rm <id or task description>
+            remove the task from the list
+            */
             println!("Rm command called");
         }
     }
@@ -109,6 +157,18 @@ mod tests {
         use clap::CommandFactory;
         Cli::command().debug_assert();
         println!("{:#?}", Cli::command());
+    }
+
+    #[test]
+    fn test_get_cfg_dir_path() {
+        let home_dir = std::env::home_dir().unwrap_or("~?".into());
+        assert_eq!(todors::get_cfg_dir_path(), home_dir.join(".todors"));
+    }
+
+    #[test]
+    fn test_get_cfg_file_path() {
+        let home_dir = std::env::home_dir().unwrap_or("~?".into());
+        assert_eq!(todors::get_cfg_file_path(), home_dir.join(".todors").join("todors.json"));
     }
 
 }
