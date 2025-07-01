@@ -17,6 +17,8 @@ struct Cli {
 enum Commands {
     ///  Config init
     Config(ConfigArgs),
+    ///  New list
+    New(NewArgs),
     /// Adds files to myapp
     List(ListArgs),
     /// Init the list
@@ -40,6 +42,11 @@ struct ConfigArgs {
 }
 
 #[derive(Args, Debug)]
+struct NewArgs {
+    listname: String,
+}
+
+#[derive(Args, Debug)]
 struct ListArgs {
     #[arg(short, long)]
     new: Option<String>,
@@ -57,7 +64,7 @@ struct AddArgs {
 
 #[derive(Args,Debug)]
 struct UseArgs {
-    id_or_partial_desc: String,
+    listname: String,
 }
 
 #[derive(Args,Debug)]
@@ -77,13 +84,17 @@ struct RmArgs {
 
 fn main()  -> Result<()>{
     let cli = Cli::parse();
-    println!("Hello, world!");
 
     match &cli.command {
         Commands::Config(args)  => {
             println!("args: {}", &args.init);
             create_cfg_file()?;
         },
+        Commands::New(args)  => {
+            println!("New command | args: {}", &args.listname);
+            TaskList::new(&args.listname)?;
+        },
+
         Commands::List(args)=> {
             if let Some(newlist) = &args.new{
                 println!("Creating new list : {:?}", newlist);
@@ -112,7 +123,8 @@ fn main()  -> Result<()>{
             -- use <mylist>
             set the context to <mylist>
             */
-            println!("Use command called");
+            println!("Use command called | args: {}", &args.listname);
+            TaskList::usee(&args.listname)?;
         }
         Commands::Add(args) => {
             /*
